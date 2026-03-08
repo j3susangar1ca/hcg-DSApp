@@ -23,5 +23,6 @@
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\jlang\.nuget\packages\xunit.analyzers\1.18.0</Pkgxunit_analyzers>
+    <PkgNSubstitute_Analyzers_CSharp Condition=" '$(PkgNSubstitute_Analyzers_CSharp)' == '' ">C:\Users\jlang\.nuget\packages\nsubstitute.analyzers.csharp\1.0.17</PkgNSubstitute_Analyzers_CSharp>
   </PropertyGroup>
 </Project>
