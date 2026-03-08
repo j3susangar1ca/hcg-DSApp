@@ -12,6 +12,18 @@
           "bin/placeholder/GestionDocumental.Domain.dll": {}
         }
       }
+    },
+    "net10.0/win-x64": {
+      "GestionDocumental.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/GestionDocumental.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GestionDocumental.Domain.dll": {}
+        }
+      }
     }
   },
   "libraries": {
@@ -371,6 +383,11 @@
           "System.Xml.XPath": "(,4.3.32767]",
           "System.Xml.XPath.XDocument": "(,5.0.32767]"
         }
+      }
+    },
+    "runtimes": {
+      "win-x64": {
+        "#import": []
       }
     }
   }
