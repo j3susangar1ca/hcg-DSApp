@@ -1,29 +1,43 @@
-﻿<Window
+<Window
     x:Class="GestionDocumental.Presentation.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="HCG - Gestión Documental">
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    Title="HCG - Gestión Documental con Visor IA">
 
-    <Grid Padding="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <StackPanel Spacing="10" Grid.Row="0">
-            <TextBlock Text="Gestión de Documentos CADIDO" FontSize="24" FontWeight="Bold"/>
-            <TextBlock Text="Estado del Proceso" Foreground="Gray"/>
-        </StackPanel>
+        <ScrollViewer Grid.Column="0" Padding="20" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <StackPanel Spacing="15">
+                <TextBlock Text="Procesamiento IA" FontSize="20" FontWeight="Bold"/>
+                
+                <InfoBar x:Name="FaseInfoBar" Title="Fase Actual" Message="Nacimiento" IsOpen="True" Severity="Informational" />
 
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="20">
-            <InfoBar Title="Fase Actual" Message="Nacimiento" IsOpen="True" Severity="Informational" x:Name="FaseInfoBar"/>
-            
-            <Button Content="1. Cargar PDF" HorizontalAlignment="Stretch" Padding="15" x:Name="BtnCargar"/>
-            <Button Content="2. Clasificar con IA" HorizontalAlignment="Stretch" Padding="15" IsEnabled="False" x:Name="BtnIA"/>
-            <Button Content="3. Archivar" HorizontalAlignment="Stretch" Padding="15" IsEnabled="False" x:Name="BtnArchivar"/>
-        </StackPanel>
+                <Button x:Name="BtnCargar" Content="📁 Seleccionar PDF" HorizontalAlignment="Stretch" Height="45"/>
+                
+                <Border Header="Datos Extraídos (Gemini)" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1" Padding="10" CornerRadius="4">
+                    <StackPanel Spacing="10">
+                        <TextBox Header="Remitente" Text="{x:Bind ViewModel.Remitente, Mode=OneWay}" IsReadOnly="True"/>
+                        <TextBox Header="Asunto" Text="{x:Bind ViewModel.Asunto, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"/>
+                        <CheckBox Content="Es Urgente" IsChecked="{x:Bind ViewModel.IsUrgente, Mode=OneWay}" IsEnabled="False"/>
+                    </StackPanel>
+                </Border>
 
-        <TextBlock Grid.Row="2" Text=" Núcleo Validado (Pruebas 100% OK)" Foreground="Green" HorizontalAlignment="Right"/>
+                <Button x:Name="BtnIA" Content="🤖 Clasificar con IA" HorizontalAlignment="Stretch" Height="45" IsEnabled="False" Style="{StaticResource AccentButtonStyle}"/>
+                <Button x:Name="BtnArchivar" Content="💾 Archivar en Red" HorizontalAlignment="Stretch" Height="45" IsEnabled="False"/>
+                
+                <TextBlock x:Name="StatusText" Text="{x:Bind ViewModel.MensajeEstado, Mode=OneWay}" Foreground="Gray" FontStyle="Italic" TextWrapping="Wrap"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Column="1" Background="Gray">
+            <WebView2 x:Name="PdfViewer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <TextBlock x:Name="PlaceholderText" Text="Cargue un documento para visualizarlo" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="16"/>
+        </Grid>
     </Grid>
 </Window>
+

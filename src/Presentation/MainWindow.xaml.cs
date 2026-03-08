@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using GestionDocumental.Presentation.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace GestionDocumental.Presentation;
 
@@ -11,22 +12,32 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         this.InitializeComponent();
-        
-        // Obtenemos el ViewModel del contenedor de servicios
         ViewModel = (Application.Current as App)!.Services.GetRequiredService<DocumentoViewModel>();
         
-        // Enlazamos los eventos de los botones a los comandos del ViewModel
-        BtnCargar.Click += async (s, e) => await ViewModel.SeleccionarArchivoPdfAsync(default);
+        // Eventos de botones
+        BtnCargar.Click += async (s, e) => {
+            await ViewModel.SeleccionarArchivoPdfAsync(default);
+            if (!string.IsNullOrEmpty(ViewModel.RutaArchivoPdf))
+            {
+                CargarPdfEnVisor(ViewModel.RutaArchivoPdf);
+                await ViewModel.IngresarDocumentoAsync(default);
+            }
+        };
+
         BtnIA.Click += async (s, e) => await ViewModel.ClasificarDocumentoAsync(default);
         BtnArchivar.Click += async (s, e) => await ViewModel.ArchivarDocumentoAsync(default);
         
-        // Observamos cambios en la fase para actualizar la UI
-        ViewModel.PropertyChanged += (s, e) => {
-            if (e.PropertyName == nameof(ViewModel.FaseActual))
-            {
-                ActualizarInterfaz();
-            }
-        };
+        ViewModel.PropertyChanged += (s, e) => ActualizarInterfaz();
+    }
+
+    private void CargarPdfEnVisor(string path)
+    {
+        try {
+            PlaceholderText.Visibility = Visibility.Collapsed;
+            PdfViewer.Source = new Uri(path);
+        } catch {
+            StatusText.Text = "Error al visualizar el PDF.";
+        }
     }
 
     private void ActualizarInterfaz()
@@ -34,11 +45,5 @@ public sealed partial class MainWindow : Window
         FaseInfoBar.Title = $"Fase Actual: {ViewModel.FaseActual}";
         BtnIA.IsEnabled = ViewModel.CanClasificar;
         BtnArchivar.IsEnabled = ViewModel.CanArchivar;
-        
-        if (ViewModel.FaseActual == Domain.Enums.FaseCicloVida.Ingresado)
-        {
-            // Auto-sellar después de ingresar (flujo optimizado)
-            _ = ViewModel.SellarDocumentoAsync(default);
-        }
     }
 }
