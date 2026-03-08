@@ -5,6 +5,7 @@ using System.Text.Json;
 using FluentAssertions;
 using GestionDocumental.Application.DTOs;
 using GestionDocumental.Application.Interfaces;
+using GestionDocumental.Domain.Enums;
 using GestionDocumental.Infrastructure.Services;
 using Microsoft.Extensions.Options;
 using NSubstitute;
