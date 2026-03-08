@@ -13,7 +13,8 @@
     <NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
     
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <DISABLE_XAML_GENERATED_MAIN>true</DISABLE_XAML_GENERATED_MAIN>
+      <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,7 @@
   </ItemGroup>
 
 </Project>
+
 
 
 

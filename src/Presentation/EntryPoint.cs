@@ -11,7 +11,8 @@ public static class Program
         WinRT.ComWrappersSupport.InitializeComWrappers();
         Application.Start((p) =>
         {
-            var context = new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
+            var context = new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
+                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
             System.Threading.SynchronizationContext.SetSynchronizationContext(context);
             new App();
         });
