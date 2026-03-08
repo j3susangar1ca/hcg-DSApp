@@ -1,0 +1,5 @@
+C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.AssemblyInfoInputs.cache
+C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.AssemblyInfo.cs
+C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.csproj.CoreCompileInputs.cache
+C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.sourcelink.json

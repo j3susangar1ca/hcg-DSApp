@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "GestionDocumental.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/GestionDocumental.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GestionDocumental.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "GestionDocumental.Domain/1.0.0": {
+      "type": "project",
+      "path": "../Domain/GestionDocumental.Domain.csproj",
+      "msbuildProject": "../Domain/GestionDocumental.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "GestionDocumental.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\jlang\\.nuget\\packages\\": {},
@@ -39,7 +58,11 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\hcg-DSApp\\src\\Domain\\GestionDocumental.Domain.csproj": {
+              "projectPath": "C:\\hcg-DSApp\\src\\Domain\\GestionDocumental.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
