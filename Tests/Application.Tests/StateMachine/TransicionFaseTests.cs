@@ -1,4 +1,4 @@
-// Tests/Application.Tests/StateMachine/TransicionFaseTests.cs
+﻿// Tests/Application.Tests/StateMachine/TransicionFaseTests.cs
 using FluentAssertions;
 using GestionDocumental.Application.DTOs;
 using GestionDocumental.Application.Interfaces;
@@ -71,7 +71,10 @@ public sealed class TransicionFaseTests
         // Arrange
         var vm = CrearViewModel();
         vm.FaseActual = FaseCicloVida.Clasificado;
-        vm.CadidoIdSeleccionado = Guid.NewGuid();
+                var catalogoId = Guid.NewGuid();
+        _unitOfWork.Catalogos.BuscarAsync(Arg.Any<System.Linq.Expressions.Expression<Func<GestionDocumental.Domain.Entities.CatalogoCadido, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<GestionDocumental.Domain.Entities.CatalogoCadido> { new() { Id = catalogoId, Subserie = "Test" } });
+        vm.CadidoIdSeleccionado = catalogoId;
         vm.RutaRedActual = @"\\server\docs\file.pdf";
         vm.HashCriptografico = null!; // sin hash
 
@@ -88,7 +91,10 @@ public sealed class TransicionFaseTests
         // Arrange
         var vm = CrearViewModel();
         vm.FaseActual = FaseCicloVida.Clasificado;
-        vm.CadidoIdSeleccionado = Guid.NewGuid();
+                var catalogoId = Guid.NewGuid();
+        _unitOfWork.Catalogos.BuscarAsync(Arg.Any<System.Linq.Expressions.Expression<Func<GestionDocumental.Domain.Entities.CatalogoCadido, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<GestionDocumental.Domain.Entities.CatalogoCadido> { new() { Id = catalogoId, Subserie = "Test" } });
+        vm.CadidoIdSeleccionado = catalogoId;
         vm.RutaRedActual = null!; // sin ruta
 
         // Act
@@ -173,7 +179,10 @@ public sealed class TransicionFaseTests
         // Arrange
         var vm = CrearViewModel();
         vm.FaseActual = FaseCicloVida.Clasificado;
-        vm.CadidoIdSeleccionado = Guid.NewGuid();
+                var catalogoId = Guid.NewGuid();
+        _unitOfWork.Catalogos.BuscarAsync(Arg.Any<System.Linq.Expressions.Expression<Func<GestionDocumental.Domain.Entities.CatalogoCadido, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<GestionDocumental.Domain.Entities.CatalogoCadido> { new() { Id = catalogoId, Subserie = "Test" } });
+        vm.CadidoIdSeleccionado = catalogoId;
         vm.RutaRedActual = @"\\server\temp\doc.pdf";
         vm.HashCriptografico = "hash";
         vm.FolioOficial = "FOL-001";

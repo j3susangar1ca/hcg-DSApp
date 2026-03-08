@@ -90,7 +90,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
     public bool CanSellar => FaseActual == FaseCicloVida.Ingresado && !string.IsNullOrEmpty(RutaRedActual) && !IsProcessing;
     public bool CanClasificar => FaseActual == FaseCicloVida.Sellado && !string.IsNullOrEmpty(TextoExtraidoOcr) && !IsProcessing;
     public bool CanArchivar => FaseActual == FaseCicloVida.Clasificado && CadidoIdSeleccionado.HasValue && !IsProcessing;
-    public bool CanRechazar => FaseActual is FaseCicloVida.Ingresado or FaseCicloVida.Sellado or FaseCicloVida.Clasificado && !IsProcessing;
+    public bool CanRechazar => FaseActual != FaseCicloVida.Nacimiento && FaseActual != FaseCicloVida.Archivado && FaseActual != FaseCicloVida.Rechazado && !IsProcessing;
 
     public DocumentoViewModel(
         IDocumentAnalyzerService analyzerService,
@@ -236,7 +236,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
     [RelayCommand(CanExecute = nameof(CanArchivar))]
     public async Task ArchivarDocumentoAsync(CancellationToken ct)
     {
-        if (!CadidoIdSeleccionado.HasValue) throw new ExcepcionDeNegocio("CADIDO requerido para archivar");
+        if (!CadidoIdSeleccionado.HasValue) throw new ExcepcionDeNegocio("El documento no cumple las fases requeridas para archivar (CADIDO faltante)");
 
         IsProcessing = true;
         
@@ -361,4 +361,5 @@ public class BitacoraItemViewModel : ObservableObject
     public string FaseNueva { get; set; } = string.Empty;
     public string DescripcionEvento { get; set; } = string.Empty;
 }
+
 
