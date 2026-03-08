@@ -1,9 +1,9 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
 using GestionDocumental.Application.Interfaces;
 using GestionDocumental.Infrastructure.Services;
 using GestionDocumental.Infrastructure.Data;
@@ -11,11 +11,10 @@ using GestionDocumental.Presentation.ViewModels;
 
 namespace GestionDocumental.Presentation;
 
-// Usamos el nombre completo para evitar colisión con el namespace 'Application'
 public partial class App : global::Microsoft.UI.Xaml.Application
 {
     public IServiceProvider Services { get; }
-    private Window m_window;
+    private Window? m_window;
 
     public App()
     {
@@ -26,16 +25,17 @@ public partial class App : global::Microsoft.UI.Xaml.Application
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
+        var basePath = AppContext.BaseDirectory;
 
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .SetBasePath(basePath)
+            .AddJsonFile("appsettings.json", optional: false)
             .Build();
 
         services.AddSingleton<IConfiguration>(configuration);
         services.AddDbContext<DocumentoDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-        
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHttpClient<IDocumentAnalyzerService, DocumentAnalyzerService>();
         services.Configure<GeminiOptions>(configuration.GetSection("Gemini"));
@@ -47,7 +47,7 @@ public partial class App : global::Microsoft.UI.Xaml.Application
         return services.BuildServiceProvider();
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override void OnLaunched(global::Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         m_window = new MainWindow();
         m_window.Activate();
