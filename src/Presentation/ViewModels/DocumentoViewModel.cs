@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -17,7 +17,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
     private readonly ICryptoSealer _cryptoSealer;
     private readonly INetworkStorageManager _storageManager;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly DispatcherQueue _dispatcherQueue;
+    private readonly DispatcherQueue? _dispatcherQueue;
     
     private readonly WeakReferenceMessenger _messenger = WeakReferenceMessenger.Default;
 
@@ -105,19 +105,30 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         _storageManager = storageManager;
         _unitOfWork = unitOfWork;
         
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread() 
-            ?? throw new InvalidOperationException("ViewModel must be constructed on UI thread");
+        // Permite inicializacion nula para entornos Headless (Pruebas Unitarias)
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         
         _messenger.Register<FaseChangedMessage>(this, (r, m) => OnFaseChangedMessageReceived(m));
     }
 
+    private void EnqueueUI(Action action)
+    {
+        if (_dispatcherQueue != null)
+        {
+            _dispatcherQueue.TryEnqueue(() => action());
+        }
+        else
+        {
+            action(); // Fallback sincrono para xUnit
+        }
+    }
+
     [RelayCommand]
-    private async Task SeleccionarArchivoPdfAsync(CancellationToken ct)
+    public async Task SeleccionarArchivoPdfAsync(CancellationToken ct)
     {
         var picker = new Windows.Storage.Pickers.FileOpenPicker();
         picker.FileTypeFilter.Add(".pdf");
         
-        // Simulación para compatibilidad hasta tener el setup completo del App.xaml.cs de WinUI 3
         var file = await picker.PickSingleFileAsync();
         if (file != null)
         {
@@ -126,7 +137,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand(CanExecute = nameof(CanIngresar))]
-    private async Task IngresarDocumentoAsync(CancellationToken ct)
+    public async Task IngresarDocumentoAsync(CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrEmpty(RutaArchivoPdf);
         
@@ -140,7 +151,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
             await RegistrarEventoBitacoraAsync("Nacimiento", FaseCicloVida.Ingresado.ToString(), 
                 "Documento ingresado. Origen: " + RutaArchivoPdf, ct).ConfigureAwait(false);
 
-            _dispatcherQueue.TryEnqueue(() => 
+            EnqueueUI(() => 
             {
                 FaseActual = FaseCicloVida.Ingresado;
                 MensajeEstado = "Documento ingresado exitosamente";
@@ -152,12 +163,12 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
+            EnqueueUI(() => IsProcessing = false);
         }
     }
 
     [RelayCommand(CanExecute = nameof(CanSellar))]
-    private async Task SellarDocumentoAsync(CancellationToken ct)
+    public async Task SellarDocumentoAsync(CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrEmpty(RutaRedActual);
         
@@ -171,7 +182,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
             await RegistrarEventoBitacoraAsync("Ingresado", FaseCicloVida.Sellado.ToString(),
                 "Documento sellado. Hash: " + hash[..16] + "...", ct).ConfigureAwait(false);
 
-            _dispatcherQueue.TryEnqueue(() =>
+            EnqueueUI(() =>
             {
                 HashCriptografico = hash;
                 FaseActual = FaseCicloVida.Sellado;
@@ -180,12 +191,12 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
+            EnqueueUI(() => IsProcessing = false);
         }
     }
 
     [RelayCommand(CanExecute = nameof(CanClasificar))]
-    private async Task ClasificarDocumentoAsync(CancellationToken ct)
+    public async Task ClasificarDocumentoAsync(CancellationToken ct)
     {
         IsProcessing = true;
         MensajeEstado = "Clasificando documento...";
@@ -195,7 +206,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
             var texto = await _ocrProcessor.ExtraerTextoAsync(RutaRedActual, ct).ConfigureAwait(false);
             var analisis = await _analyzerService.AnalizarDocumentoAsync(texto, ct).ConfigureAwait(false);
 
-            _dispatcherQueue.TryEnqueue(() =>
+            EnqueueUI(() =>
             {
                 TextoExtraidoOcr = texto;
                 FolioOficial = analisis.Folio ?? GenerateFolioAutomatico();
@@ -211,12 +222,12 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
+            EnqueueUI(() => IsProcessing = false);
         }
     }
 
     [RelayCommand(CanExecute = nameof(CanArchivar))]
-    private async Task ArchivarDocumentoAsync(CancellationToken ct)
+    public async Task ArchivarDocumentoAsync(CancellationToken ct)
     {
         if (!CadidoIdSeleccionado.HasValue) throw new ExcepcionDeNegocio("CADIDO requerido para archivar");
 
@@ -228,13 +239,13 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
                 .BuscarAsync(c => c.Id == CadidoIdSeleccionado.Value, ct)
                 .ContinueWith(t => t.Result.FirstOrDefault(), ct).ConfigureAwait(false);
 
-            if (catalogo == null) throw new ExcepcionDeNegocio("Catálogo no encontrado");
+            if (catalogo == null) throw new ExcepcionDeNegocio("Catalogo no encontrado");
 
             var rutaFinal = await _storageManager.MoverADefinitivoAsync(
                 RutaRedActual, catalogo.Subserie.Replace(" ", "_"), 
                 DateTime.Now.Year, FolioOficial, ct).ConfigureAwait(false);
 
-            _dispatcherQueue.TryEnqueue(() =>
+            EnqueueUI(() =>
             {
                 RutaRedActual = rutaFinal;
                 FaseActual = FaseCicloVida.Archivado;
@@ -242,7 +253,30 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
+            EnqueueUI(() => IsProcessing = false);
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRechazar))]
+    public async Task RechazarDocumentoAsync(CancellationToken ct)
+    {
+        IsProcessing = true;
+        MensajeEstado = "Rechazando documento...";
+
+        try
+        {
+            await RegistrarEventoBitacoraAsync(FaseActual.ToString(), FaseCicloVida.Rechazado.ToString(), 
+                "Documento rechazado por el operador", ct).ConfigureAwait(false);
+
+            EnqueueUI(() =>
+            {
+                FaseActual = FaseCicloVida.Rechazado;
+                MensajeEstado = "Documento rechazado exitosamente";
+            });
+        }
+        finally
+        {
+            EnqueueUI(() => IsProcessing = false);
         }
     }
 
@@ -256,7 +290,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
                 Subserie = c.Subserie, PlazoConservacionAnios = c.PlazoConservacionAnios
             }).ToList();
 
-        _dispatcherQueue.TryEnqueue(() =>
+        EnqueueUI(() =>
         {
             CatalogoCadidoItems.Clear();
             foreach (var item in items) CatalogoCadidoItems.Add(item);
@@ -274,7 +308,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         await _unitOfWork.Bitacoras.AgregarAsync(bitacora, ct).ConfigureAwait(false);
         await _unitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
 
-        _dispatcherQueue.TryEnqueue(() =>
+        EnqueueUI(() =>
         {
             BitacoraEventos.Add(new BitacoraItemViewModel
             {
@@ -320,4 +354,3 @@ public class BitacoraItemViewModel : ObservableObject
     public string FaseNueva { get; set; } = string.Empty;
     public string DescripcionEvento { get; set; } = string.Empty;
 }
-
