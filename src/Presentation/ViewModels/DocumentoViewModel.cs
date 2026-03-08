@@ -140,7 +140,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
             await RegistrarEventoBitacoraAsync("Nacimiento", FaseCicloVida.Ingresado.ToString(), 
                 "Documento ingresado. Origen: " + RutaArchivoPdf, ct).ConfigureAwait(false);
 
-            await _dispatcherQueue.EnqueueAsync(() => 
+            _dispatcherQueue.TryEnqueue(() => 
             {
                 FaseActual = FaseCicloVida.Ingresado;
                 MensajeEstado = "Documento ingresado exitosamente";
@@ -152,7 +152,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            await _dispatcherQueue.EnqueueAsync(() => IsProcessing = false);
+            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
         }
     }
 
@@ -171,7 +171,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
             await RegistrarEventoBitacoraAsync("Ingresado", FaseCicloVida.Sellado.ToString(),
                 "Documento sellado. Hash: " + hash[..16] + "...", ct).ConfigureAwait(false);
 
-            await _dispatcherQueue.EnqueueAsync(() =>
+            _dispatcherQueue.TryEnqueue(() =>
             {
                 HashCriptografico = hash;
                 FaseActual = FaseCicloVida.Sellado;
@@ -180,7 +180,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            await _dispatcherQueue.EnqueueAsync(() => IsProcessing = false);
+            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
         }
     }
 
@@ -195,7 +195,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
             var texto = await _ocrProcessor.ExtraerTextoAsync(RutaRedActual, ct).ConfigureAwait(false);
             var analisis = await _analyzerService.AnalizarDocumentoAsync(texto, ct).ConfigureAwait(false);
 
-            await _dispatcherQueue.EnqueueAsync(() =>
+            _dispatcherQueue.TryEnqueue(() =>
             {
                 TextoExtraidoOcr = texto;
                 FolioOficial = analisis.Folio ?? GenerateFolioAutomatico();
@@ -211,7 +211,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            await _dispatcherQueue.EnqueueAsync(() => IsProcessing = false);
+            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
         }
     }
 
@@ -234,7 +234,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
                 RutaRedActual, catalogo.Subserie.Replace(" ", "_"), 
                 DateTime.Now.Year, FolioOficial, ct).ConfigureAwait(false);
 
-            await _dispatcherQueue.EnqueueAsync(() =>
+            _dispatcherQueue.TryEnqueue(() =>
             {
                 RutaRedActual = rutaFinal;
                 FaseActual = FaseCicloVida.Archivado;
@@ -242,7 +242,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            await _dispatcherQueue.EnqueueAsync(() => IsProcessing = false);
+            _dispatcherQueue.TryEnqueue(() => IsProcessing = false);
         }
     }
 
@@ -256,7 +256,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
                 Subserie = c.Subserie, PlazoConservacionAnios = c.PlazoConservacionAnios
             }).ToList();
 
-        await _dispatcherQueue.EnqueueAsync(() =>
+        _dispatcherQueue.TryEnqueue(() =>
         {
             CatalogoCadidoItems.Clear();
             foreach (var item in items) CatalogoCadidoItems.Add(item);
@@ -274,7 +274,7 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         await _unitOfWork.Bitacoras.AgregarAsync(bitacora, ct).ConfigureAwait(false);
         await _unitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
 
-        await _dispatcherQueue.EnqueueAsync(() =>
+        _dispatcherQueue.TryEnqueue(() =>
         {
             BitacoraEventos.Add(new BitacoraItemViewModel
             {
@@ -320,3 +320,4 @@ public class BitacoraItemViewModel : ObservableObject
     public string FaseNueva { get; set; } = string.Empty;
     public string DescripcionEvento { get; set; } = string.Empty;
 }
+
