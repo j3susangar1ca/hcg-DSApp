@@ -1,0 +1,6 @@
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.csproj.AssemblyReference.cache
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.AssemblyInfoInputs.cache
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.AssemblyInfo.cs
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.csproj.CoreCompileInputs.cache
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.sourcelink.json

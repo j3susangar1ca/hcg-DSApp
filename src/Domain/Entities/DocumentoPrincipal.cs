@@ -1,3 +1,4 @@
+using GestionDocumental.Domain.Enums;
 namespace GestionDocumental.Domain.Entities;
 
 public sealed class DocumentoPrincipal

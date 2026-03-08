@@ -1,0 +1,16 @@
+C:\hcg-DSApp\src\Application\bin\Debug\net10.0\GestionDocumental.Application.deps.json
+C:\hcg-DSApp\src\Application\bin\Debug\net10.0\GestionDocumental.Application.dll
+C:\hcg-DSApp\src\Application\bin\Debug\net10.0\GestionDocumental.Application.pdb
+C:\hcg-DSApp\src\Application\bin\Debug\net10.0\GestionDocumental.Domain.dll
+C:\hcg-DSApp\src\Application\bin\Debug\net10.0\GestionDocumental.Domain.pdb
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.csproj.AssemblyReference.cache
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.AssemblyInfoInputs.cache
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.AssemblyInfo.cs
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.csproj.CoreCompileInputs.cache
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.sourcelink.json
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionD.89152EA5.Up2Date
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.dll
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\refint\GestionDocumental.Application.dll
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\GestionDocumental.Application.pdb
+C:\hcg-DSApp\src\Application\obj\Debug\net10.0\ref\GestionDocumental.Application.dll
