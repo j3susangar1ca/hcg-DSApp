@@ -13,22 +13,31 @@ namespace GestionDocumental.Presentation;
 
 public partial class App : global::Microsoft.UI.Xaml.Application
 {
-    public IServiceProvider Services { get; }
+    public IServiceProvider? Services { get; private set; }
     private Window? m_window;
 
     public App()
     {
-        Services = ConfigureServices();
         this.InitializeComponent();
     }
 
-    private static IServiceProvider ConfigureServices()
+    protected override void OnLaunched(global::Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    {
+        try {
+            Services = ConfigureServices();
+            m_window = new MainWindow();
+            m_window.Activate();
+        }
+        catch (Exception ex) {
+            File.WriteAllText("crash_log.txt", ex.ToString());
+        }
+    }
+
+    private IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
-        var basePath = AppContext.BaseDirectory;
-
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(basePath)
+            .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
 
@@ -45,11 +54,5 @@ public partial class App : global::Microsoft.UI.Xaml.Application
         services.AddTransient<DocumentoViewModel>();
 
         return services.BuildServiceProvider();
-    }
-
-    protected override void OnLaunched(global::Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
-    {
-        m_window = new MainWindow();
-        m_window.Activate();
     }
 }

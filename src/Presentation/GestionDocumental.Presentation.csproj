@@ -16,6 +16,7 @@
     <WindowsPackageType>None</WindowsPackageType>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <WindowsAppSDKWinUIImplicitlyExpandReferencedAssemblies>true</WindowsAppSDKWinUIImplicitlyExpandReferencedAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,6 +39,7 @@
     </None>
   </ItemGroup>
 </Project>
+
 
 
 
