@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -106,7 +106,14 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
         _unitOfWork = unitOfWork;
         
         // Permite inicializacion nula para entornos Headless (Pruebas Unitarias)
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+                try 
+        { 
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread(); 
+        }
+        catch 
+        { 
+            _dispatcherQueue = null; // Entorno Headless (xUnit)
+        }
         
         _messenger.Register<FaseChangedMessage>(this, (r, m) => OnFaseChangedMessageReceived(m));
     }
@@ -354,3 +361,4 @@ public class BitacoraItemViewModel : ObservableObject
     public string FaseNueva { get; set; } = string.Empty;
     public string DescripcionEvento { get; set; } = string.Empty;
 }
+
