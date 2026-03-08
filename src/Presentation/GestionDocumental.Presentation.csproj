@@ -15,12 +15,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\GestionDocumental.Infrastructure.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" ProxyStub="false" />
-    <Page Include="MainWindow.xaml" ProxyStub="false" />
-  </ItemGroup>
 </Project>
+
 
 
 
