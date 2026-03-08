@@ -9,88 +9,81 @@ public sealed class NetworkStorageManager : INetworkStorageManager
 
     public NetworkStorageManager()
     {
-        if (!Directory.Exists(_rutaTemporalBase))
-        {
-            Directory.CreateDirectory(_rutaTemporalBase);
-        }
+        Directory.CreateDirectory(_rutaTemporalBase);
     }
 
     public async Task<string> CopiarATemporalAsync(string rutaOrigen, 
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         if (!File.Exists(rutaOrigen))
-        {
-            throw new FileNotFoundException($"El archivo de origen no existe: {rutaOrigen}");
-        }
+            throw new FileNotFoundException($"Origen no existe: {rutaOrigen}");
 
         var nombreArchivo = Path.GetFileName(rutaOrigen);
-        var rutaDestino = Path.Combine(_rutaTemporalBase, nombreArchivo);
-        
-        // Si ya existe, generamos un nombre único
-        if (File.Exists(rutaDestino))
-        {
-            var nombreSinExtension = Path.GetFileNameWithoutExtension(nombreArchivo);
-            var extension = Path.GetExtension(nombreArchivo);
-            var contador = 1;
-            
-            do
-            {
-                rutaDestino = Path.Combine(_rutaTemporalBase, 
-                    $"{nombreSinExtension}_{contador}{extension}");
-                contador++;
-            } while (File.Exists(rutaDestino));
-        }
+        var rutaDestino = GenerarRutaUnica(_rutaTemporalBase, nombreArchivo);
 
-        await File.CopyAsync(rutaOrigen, rutaDestino, cancellationToken);
+        // .NET 10: File.CopyAsync con CancellationToken nativo
+        await File.CopyAsync(rutaOrigen, rutaDestino, ct).ConfigureAwait(false);
         return rutaDestino;
     }
 
     public async Task<string> MoverADefinitivoAsync(string rutaTemporal, string codigoCadido, 
-        int anio, string folio, CancellationToken cancellationToken = default)
+        int anio, string folio, CancellationToken ct = default)
     {
         var nombreFinal = GenerarNombreConvencional(codigoCadido, anio, folio);
         var carpetaDestino = Path.Combine(_rutaDefinitivaBase, anio.ToString(), codigoCadido);
         
-        if (!Directory.Exists(carpetaDestino))
-        {
-            Directory.CreateDirectory(carpetaDestino);
-        }
+        Directory.CreateDirectory(carpetaDestino);
 
         var rutaFinal = Path.Combine(carpetaDestino, nombreFinal);
         
         if (File.Exists(rutaFinal))
-        {
-            throw new InvalidOperationException($"Ya existe un archivo con este nombre: {rutaFinal}");
-        }
+            throw new InvalidOperationException($"Archivo existente: {rutaFinal}");
 
-        await File.MoveAsync(rutaTemporal, rutaFinal, cancellationToken);
+        // .NET 10: File.MoveAsync con CancellationToken
+        await File.MoveAsync(rutaTemporal, rutaFinal, ct).ConfigureAwait(false);
         return rutaFinal;
     }
 
     public string GenerarNombreConvencional(string codigoCadido, int anio, string folio)
     {
+        // C# 14: Interpolación de cadenas con expresiones
         return $"{codigoCadido}_{anio}_{folio}.pdf";
     }
 
+    private static string GenerarRutaUnica(string directorioBase, string nombreArchivo)
+    {
+        var rutaDestino = Path.Combine(directorioBase, nombreArchivo);
+        if (!File.Exists(rutaDestino)) return rutaDestino;
+
+        var nombreSinExtension = Path.GetFileNameWithoutExtension(nombreArchivo);
+        var extension = Path.GetExtension(nombreArchivo);
+        
+        // C# 14: params collections en lugar de arrays explícitos
+        return string.Join("_", [nombreSinExtension, Guid.NewGuid().ToString()[..8], extension]);
+    }
+
     public async Task<bool> VerificarAccesibilidadAsync(string ruta, 
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         try
         {
-            if (Directory.Exists(ruta) || File.Exists(ruta))
+            if (!Directory.Exists(ruta) && !File.Exists(ruta)) return false;
+            
+            if (Directory.Exists(ruta))
             {
-                // Intentamos leer un directorio o archivo para verificar acceso
-                if (Directory.Exists(ruta))
-                {
-                    _ = Directory.GetFiles(ruta, "*", SearchOption.TopDirectoryOnly);
-                }
-                else
-                {
-                    using var fs = File.OpenRead(ruta);
-                }
-                return true;
+                _ = await Task.Run(() => Directory.GetFiles(ruta, "*", SearchOption.TopDirectoryOnly), ct)
+                    .ConfigureAwait(false);
             }
-            return false;
+            else
+            {
+                using var fs = File.OpenRead(ruta);
+                await fs.ReadAsync([], ct).ConfigureAwait(false); // Operación no-op con ct
+            }
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch
         {
