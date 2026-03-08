@@ -3,46 +3,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionDocumental.Infrastructure.Data;
 
-public sealed class Repositorio<T> : IRepositorio<T> where T : class
+public sealed class Repositorio<T>(DocumentoDbContext context) : IRepositorio<T> 
+    where T : class
 {
-    private readonly DocumentoDbContext _context;
+    private readonly DocumentoDbContext _context = context;
 
-    public Repositorio(DocumentoDbContext context)
+    public async Task<T?> ObtenerPorIdAsync(Guid id, CancellationToken ct = default)
     {
-        _context = context;
+        return await _context.Set<T>().FindAsync([id], ct).ConfigureAwait(false);
     }
 
-    public async Task<T?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<T>> ObtenerTodosAsync(CancellationToken ct = default)
     {
-        return await _context.Set<T>().FindAsync([id], cancellationToken);
-    }
-
-    public async Task<IEnumerable<T>> ObtenerTodosAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.Set<T>().ToListAsync(cancellationToken);
+        // CRITICAL FIX: AsNoTracking() para operaciones de solo lectura
+        return await _context.Set<T>()
+            .AsNoTracking()
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<T>> BuscarAsync(
         System.Linq.Expressions.Expression<Func<T, bool>> predicado, 
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        return await _context.Set<T>().Where(predicado).ToListAsync(cancellationToken);
+        return await _context.Set<T>()
+            .AsNoTracking()
+            .Where(predicado)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 
-    public async Task AgregarAsync(T entidad, CancellationToken cancellationToken = default)
+    public async Task AgregarAsync(T entidad, CancellationToken ct = default)
     {
-        await _context.Set<T>().AddAsync(entidad, cancellationToken);
+        await _context.Set<T>().AddAsync(entidad, ct).ConfigureAwait(false);
     }
 
-    public Task ActualizarAsync(T entidad, CancellationToken cancellationToken = default)
+    public Task ActualizarAsync(T entidad, CancellationToken ct = default)
     {
-        _ = _context.Set<T>().Update(entidad);
+        _context.Set<T>().Update(entidad);
         return Task.CompletedTask;
     }
 
-    public Task EliminarAsync(T entidad, CancellationToken cancellationToken = default)
+    public Task EliminarAsync(T entidad, CancellationToken ct = default)
     {
-        _ = _context.Set<T>().Remove(entidad);
+        _context.Set<T>().Remove(entidad);
         return Task.CompletedTask;
     }
 }
