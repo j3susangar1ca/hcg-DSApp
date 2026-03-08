@@ -1,11 +1,11 @@
+C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.deps.json
+C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.dll
+C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.pdb
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.GeneratedMSBuildEditorConfig.editorconfig
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.AssemblyInfoInputs.cache
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.AssemblyInfo.cs
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.csproj.CoreCompileInputs.cache
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.sourcelink.json
-C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.deps.json
-C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.dll
-C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.pdb
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.dll
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\refint\GestionDocumental.Domain.dll
 C:\hcg-DSApp\src\Domain\obj\Debug\net10.0\GestionDocumental.Domain.pdb
