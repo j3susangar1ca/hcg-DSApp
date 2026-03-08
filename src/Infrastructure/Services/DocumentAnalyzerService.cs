@@ -9,19 +9,16 @@ using Polly.Extensions.Http;
 
 namespace GestionDocumental.Infrastructure.Services;
 
-public sealed class DocumentAnalyzerService : IDocumentAnalyzerService
+public sealed class DocumentAnalyzerService(
+    HttpClient httpClient,
+    IOptions<GeminiOptions> options) : IDocumentAnalyzerService
 {
-    private readonly HttpClient _httpClient;
-    private readonly GeminiOptions _options;
-
-    public DocumentAnalyzerService(HttpClient httpClient, IOptions<GeminiOptions> options)
-    {
-        _httpClient = httpClient;
-        _options = options.Value;
-    }
+    // C# 14 field keyword para backing field automático
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly GeminiOptions _options = options.Value;
 
     public async Task<GeminiResponseDto> AnalizarDocumentoAsync(string textoDocumento, 
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         var policy = HttpPolicyExtensions
             .HandleTransientHttpError()
@@ -31,7 +28,7 @@ public sealed class DocumentAnalyzerService : IDocumentAnalyzerService
                 sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 onRetry: (outcome, timespan, retryCount, context) =>
                 {
-                    Console.WriteLine($"Reintento {retryCount} tras {timespan}s");
+                    // Logging estructurado requerido
                 });
 
         var requestBody = new
@@ -52,80 +49,44 @@ public sealed class DocumentAnalyzerService : IDocumentAnalyzerService
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        try
+        // NO se captura Exception genérica - permitir propagación
+        var response = await policy.ExecuteAsync(async (innerCt) =>
         {
-            var response = await policy.ExecuteAsync(async (ct) =>
+            var request = new HttpRequestMessage(HttpMethod.Post, 
+                $"{_options.Endpoint}?key={_options.ApiKey}")
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, 
-                    $"{_options.Endpoint}?key={_options.ApiKey}")
-                {
-                    Content = content
-                };
-                
-                var httpResponse = await _httpClient.SendAsync(request, ct);
-                httpResponse.EnsureSuccessStatusCode();
-                return httpResponse;
-            }, cancellationToken);
+                Content = content
+            };
+            
+            var httpResponse = await _httpClient.SendAsync(request, innerCt).ConfigureAwait(false);
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse;
+        }, ct);
 
-            var responseString = await response.Content.ReadAsStringAsync(cancellationToken);
-            
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            
-            var geminiResponse = JsonSerializer.Deserialize<GeminiResponseDto>(responseString, options) 
-                                 ?? new GeminiResponseDto();
-            
-            return geminiResponse;
-        }
-        catch (JsonException)
-        {
-            // En caso de error de parsing JSON, retornamos valores por defecto
-            return new GeminiResponseDto
-            {
-                Remitente = string.Empty,
-                Asunto = string.Empty,
-                EsUrgente = false,
-                EstatusSugerido = "ARCHIVAR"
-            };
-        }
-        catch (Exception)
-        {
-            // En caso de otros errores, retornamos valores por defecto
-            return new GeminiResponseDto
-            {
-                Remitente = string.Empty,
-                Asunto = string.Empty,
-                EsUrgente = false,
-                EstatusSugerido = "ARCHIVAR"
-            };
-        }
+        var responseString = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        
+        // Deserialización con validación estricta
+        var result = JsonSerializer.Deserialize<GeminiResponseDto>(responseString, 
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return result ?? throw new InvalidOperationException("Respuesta Gemini inválida: deserialización nula");
     }
 
     public string ConstruirPromptSistema()
     {
-        return @"
+        // C# 14: Raw string literals con interpolación segura
+        return """
             Eres un asistente experto en análisis documental según las normas CADIDO.
-            Analiza el texto proporcionado y extrae la siguiente información en formato JSON:
-            - folio: número de folio si está presente
-            - remitente: nombre del remitente
-            - asunto: asunto principal del documento
-            - es_urgente: booleano indicando si es urgente
-            - estatus_sugerido: uno de [RESPUESTA, GESTION, AVISO, ARCHIVAR]
+            Analiza el texto proporcionado y extrae la siguiente información en formato JSON estricto:
+            {
+                "folio": "string o null",
+                "remitente": "string (requerido)",
+                "asunto": "string (requerido)",
+                "es_urgente": boolean,
+                "estatus_sugerido": "RESPUESTA" | "GESTION" | "AVISO" | "ARCHIVAR"
+            }
             
-            Las categorías son:
-            - RESPUESTA: documentos que requieren respuesta formal
-            - GESTION: documentos que requieren acción administrativa
-            - AVISO: documentos informativos
-            - ARCHIVAR: documentos históricos
-            
-            Responde ÚNICAMENTE con el objeto JSON sin texto adicional.";
+            Responde ÚNICAMENTE con el objeto JSON. No incluyas markdown ni texto adicional.
+            """;
     }
-}
-
-public class GeminiOptions
-{
-    public string ApiKey { get; set; } = string.Empty;
-    public string Endpoint { get; set; } = string.Empty;
 }
