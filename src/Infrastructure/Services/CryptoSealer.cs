@@ -3,11 +3,9 @@ using GestionDocumental.Application.Interfaces;
 
 namespace GestionDocumental.Infrastructure.Services;
 
-public sealed class CryptoSealer(ICryptoOptions options) : ICryptoSealer
+public sealed class CryptoSealer : ICryptoSealer
 {
-    private readonly ICryptoOptions _options = options;
-
-    public async Task<string> GenerarHashSha256Async(string rutaArchivo, 
+    public async Task<string> GenerarHashSha256Async(string rutaArchivo,
         CancellationToken ct = default)
     {
         if (!File.Exists(rutaArchivo))
@@ -16,17 +14,17 @@ public sealed class CryptoSealer(ICryptoOptions options) : ICryptoSealer
         using var stream = File.OpenRead(rutaArchivo);
         using var sha256 = SHA256.Create();
         var hashBytes = await sha256.ComputeHashAsync(stream, ct).ConfigureAwait(false);
-        
+
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
-    public async Task<bool> ValidarIntegridadAsync(string rutaArchivo, string hashOriginal, 
+    public async Task<bool> ValidarIntegridadAsync(string rutaArchivo, string hashOriginal,
         CancellationToken ct = default)
     {
         try
         {
             var hashActual = await GenerarHashSha256Async(rutaArchivo, ct).ConfigureAwait(false);
-            
+
             return CryptographicOperations.FixedTimeEquals(
                 Convert.FromHexString(hashActual),
                 Convert.FromHexString(hashOriginal));
@@ -36,9 +34,4 @@ public sealed class CryptoSealer(ICryptoOptions options) : ICryptoSealer
             return false;
         }
     }
-}
-
-public interface ICryptoOptions
-{
-    int HashAlgorithmId { get; set; }
 }
