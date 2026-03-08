@@ -3,29 +3,32 @@ namespace GestionDocumental.Domain.Entities;
 
 public sealed class DocumentoPrincipal
 {
+    private string _folioOficial = string.Empty;
+    private string _remitente = string.Empty;
+    private string _asunto = string.Empty;
+
     public Guid Id { get; init; } = Guid.NewGuid();
     
-    // C# 14: field keyword elimina backing field explícito
     public required string FolioOficial 
     { 
-        get; 
-        set => field = !string.IsNullOrWhiteSpace(value) 
+        get => _folioOficial;
+        set => _folioOficial = !string.IsNullOrWhiteSpace(value) 
             ? value 
             : throw new ArgumentException("Folio requerido"); 
     }
     
     public required string Remitente 
     { 
-        get; 
-        set => field = !string.IsNullOrWhiteSpace(value) 
+        get => _remitente;
+        set => _remitente = !string.IsNullOrWhiteSpace(value) 
             ? value 
             : throw new ArgumentException("Remitente requerido"); 
     }
     
     public required string Asunto 
     { 
-        get; 
-        set => field = !string.IsNullOrWhiteSpace(value) 
+        get => _asunto;
+        set => _asunto = !string.IsNullOrWhiteSpace(value) 
             ? value 
             : throw new ArgumentException("Asunto requerido"); 
     }
@@ -41,6 +44,6 @@ public sealed class DocumentoPrincipal
     public Guid? CadidoId { get; set; }
     public CatalogoCadido? CatalogoCadido { get; set; }
     
-    // C# 14: Collection expressions
-    public ICollection<BitacoraTrazabilidad> Bitacoras { get; set; } = [];
+    public ICollection<BitacoraTrazabilidad> Bitacoras { get; set; } = new List<BitacoraTrazabilidad>();
 }
+
