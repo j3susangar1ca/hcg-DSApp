@@ -11,7 +11,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
-    <DISABLE_XAML_GENERATED_MAIN>true</DISABLE_XAML_GENERATED_MAIN>
+    
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,4 +24,5 @@
   </ItemGroup>
 
 </Project>
+
 

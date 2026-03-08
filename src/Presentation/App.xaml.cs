@@ -1,14 +1,16 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Dispatching;
+using System;
 
 namespace GestionDocumental.Presentation;
 
 public partial class App : Microsoft.UI.Xaml.Application
 {
-    // Se marca como anulable con '?' para evitar la advertencia CS8618
     private Window? m_window;
 
     public App()
     {
+        // Esto asegura que el contexto de sincronización sea el de WinUI
         this.InitializeComponent();
     }
 
