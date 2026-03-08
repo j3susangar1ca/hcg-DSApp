@@ -9,11 +9,16 @@ using Polly.Extensions.Http;
 
 namespace GestionDocumental.Infrastructure.Services;
 
+public class GeminiOptions
+{
+    public string ApiKey { get; set; } = string.Empty;
+    public string Endpoint { get; set; } = string.Empty;
+}
+
 public sealed class DocumentAnalyzerService(
     HttpClient httpClient,
     IOptions<GeminiOptions> options) : IDocumentAnalyzerService
 {
-    // C# 14 field keyword para backing field autom谩tico
     private readonly HttpClient _httpClient = httpClient;
     private readonly GeminiOptions _options = options.Value;
 
@@ -25,11 +30,7 @@ public sealed class DocumentAnalyzerService(
             .Or<TaskCanceledException>()
             .WaitAndRetryAsync(
                 retryCount: 3,
-                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                onRetry: (outcome, timespan, retryCount, context) =>
-                {
-                    // Logging estructurado requerido
-                });
+                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
         var requestBody = new
         {
@@ -49,7 +50,6 @@ public sealed class DocumentAnalyzerService(
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // NO se captura Exception gen茅rica - permitir propagaci贸n
         var response = await policy.ExecuteAsync(async (innerCt) =>
         {
             var request = new HttpRequestMessage(HttpMethod.Post, 
@@ -65,28 +65,17 @@ public sealed class DocumentAnalyzerService(
 
         var responseString = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         
-        // Deserializaci贸n con validaci贸n estricta
         var result = JsonSerializer.Deserialize<GeminiResponseDto>(responseString, 
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        return result ?? throw new InvalidOperationException("Respuesta Gemini inv谩lida: deserializaci贸n nula");
+        return result ?? throw new InvalidOperationException("Respuesta Gemini nula");
     }
 
     public string ConstruirPromptSistema()
     {
-        // C# 14: Raw string literals con interpolaci贸n segura
         return """
-            Eres un asistente experto en an谩lisis documental seg煤n las normas CADIDO.
-            Analiza el texto proporcionado y extrae la siguiente informaci贸n en formato JSON estricto:
-            {
-                "folio": "string o null",
-                "remitente": "string (requerido)",
-                "asunto": "string (requerido)",
-                "es_urgente": boolean,
-                "estatus_sugerido": "RESPUESTA" | "GESTION" | "AVISO" | "ARCHIVAR"
-            }
-            
-            Responde 脷NICAMENTE con el objeto JSON. No incluyas markdown ni texto adicional.
+            Eres un asistente experto en an醠isis documental seg鷑 las normas CADIDO.
+            Analiza el texto y extrae JSON: folio, remitente, asunto, es_urgente, estatus_sugerido.
             """;
     }
 }

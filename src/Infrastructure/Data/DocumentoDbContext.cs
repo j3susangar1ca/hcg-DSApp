@@ -30,7 +30,7 @@ public sealed class DocumentoDbContext : DbContext
         modelBuilder.Entity<BitacoraTrazabilidad>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.FIsRequired().HasMaxLength(50);
+            entity.Property(e => e.FaseAnterior).IsRequired().HasMaxLength(50);
             entity.Property(e => e.FaseNueva).IsRequired().HasMaxLength(50);
             entity.Property(e => e.DescripcionEvento).IsRequired().HasMaxLength(1000);
             entity.HasOne(b => b.DocumentoPrincipal)

@@ -5,7 +5,6 @@ namespace GestionDocumental.Infrastructure.Services;
 
 public sealed class CryptoSealer(ICryptoOptions options) : ICryptoSealer
 {
-    // C# 14: Primary constructor parameter captured as field
     private readonly ICryptoOptions _options = options;
 
     public async Task<string> GenerarHashSha256Async(string rutaArchivo, 
@@ -28,7 +27,6 @@ public sealed class CryptoSealer(ICryptoOptions options) : ICryptoSealer
         {
             var hashActual = await GenerarHashSha256Async(rutaArchivo, ct).ConfigureAwait(false);
             
-            // Comparación constant-time para prevenir timing attacks
             return CryptographicOperations.FixedTimeEquals(
                 Convert.FromHexString(hashActual),
                 Convert.FromHexString(hashOriginal));
@@ -40,8 +38,7 @@ public sealed class CryptoSealer(ICryptoOptions options) : ICryptoSealer
     }
 }
 
-// C# 14: Interface con propiedades semi-auto (field keyword)
 public interface ICryptoOptions
 {
-    int HashAlgorithmId { get; set => field = value > 0 ? value : throw new ArgumentOutOfRangeException(); }
+    int HashAlgorithmId { get; set; }
 }
