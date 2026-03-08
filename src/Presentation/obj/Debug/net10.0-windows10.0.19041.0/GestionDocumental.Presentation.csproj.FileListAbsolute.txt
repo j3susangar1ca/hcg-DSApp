@@ -1,0 +1,6 @@
+C:\hcg-DSApp\src\Presentation\obj\Debug\net10.0-windows10.0.19041.0\GestionDocumental.Presentation.csproj.AssemblyReference.cache
+C:\hcg-DSApp\src\Presentation\obj\Debug\net10.0-windows10.0.19041.0\GestionDocumental.Presentation.GeneratedMSBuildEditorConfig.editorconfig
+C:\hcg-DSApp\src\Presentation\obj\Debug\net10.0-windows10.0.19041.0\GestionDocumental.Presentation.AssemblyInfoInputs.cache
+C:\hcg-DSApp\src\Presentation\obj\Debug\net10.0-windows10.0.19041.0\GestionDocumental.Presentation.AssemblyInfo.cs
+C:\hcg-DSApp\src\Presentation\obj\Debug\net10.0-windows10.0.19041.0\GestionDocumental.Presentation.csproj.CoreCompileInputs.cache
+C:\hcg-DSApp\src\Presentation\obj\Debug\net10.0-windows10.0.19041.0\GestionDocumental.Presentation.sourcelink.json

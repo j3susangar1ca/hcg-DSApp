@@ -21,8 +21,13 @@ public sealed class NetworkStorageManager : INetworkStorageManager
         var nombreArchivo = Path.GetFileName(rutaOrigen);
         var rutaDestino = GenerarRutaUnica(_rutaTemporalBase, nombreArchivo);
 
-        // .NET 10: File.CopyAsync con CancellationToken nativo
-        await File.CopyAsync(rutaOrigen, rutaDestino, ct).ConfigureAwait(false);
+        // Uso de Streams para emular CopyAsync con soporte de CancellationToken
+        using (var sourceStream = new FileStream(rutaOrigen, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
+        using (var destinationStream = new FileStream(rutaDestino, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true))
+        {
+            await sourceStream.CopyToAsync(destinationStream, ct).ConfigureAwait(false);
+        }
+        
         return rutaDestino;
     }
 
@@ -39,14 +44,14 @@ public sealed class NetworkStorageManager : INetworkStorageManager
         if (File.Exists(rutaFinal))
             throw new InvalidOperationException($"Archivo existente: {rutaFinal}");
 
-        // .NET 10: File.MoveAsync con CancellationToken
-        await File.MoveAsync(rutaTemporal, rutaFinal, ct).ConfigureAwait(false);
+        // Move no tiene versi�n Async directa en File en muchas versiones de .NET; usamos Task.Run para no bloquear
+        await Task.Run(() => File.Move(rutaTemporal, rutaFinal), ct).ConfigureAwait(false);
+        
         return rutaFinal;
     }
 
     public string GenerarNombreConvencional(string codigoCadido, int anio, string folio)
     {
-        // C# 14: Interpolación de cadenas con expresiones
         return $"{codigoCadido}_{anio}_{folio}.pdf";
     }
 
@@ -58,8 +63,7 @@ public sealed class NetworkStorageManager : INetworkStorageManager
         var nombreSinExtension = Path.GetFileNameWithoutExtension(nombreArchivo);
         var extension = Path.GetExtension(nombreArchivo);
         
-        // C# 14: params collections en lugar de arrays explícitos
-        return string.Join("_", [nombreSinExtension, Guid.NewGuid().ToString()[..8], extension]);
+        return Path.Combine(directorioBase, $"{nombreSinExtension}_{Guid.NewGuid().ToString()[..8]}{extension}");
     }
 
     public async Task<bool> VerificarAccesibilidadAsync(string ruta, 
@@ -71,19 +75,16 @@ public sealed class NetworkStorageManager : INetworkStorageManager
             
             if (Directory.Exists(ruta))
             {
-                _ = await Task.Run(() => Directory.GetFiles(ruta, "*", SearchOption.TopDirectoryOnly), ct)
+                await Task.Run(() => Directory.GetFiles(ruta, "*", SearchOption.TopDirectoryOnly), ct)
                     .ConfigureAwait(false);
             }
             else
             {
                 using var fs = File.OpenRead(ruta);
-                await fs.ReadAsync([], ct).ConfigureAwait(false); // Operación no-op con ct
+                byte[] buffer = new byte[1];
+                await fs.ReadAsync(buffer, 0, 1, ct).ConfigureAwait(false);
             }
             return true;
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
         }
         catch
         {

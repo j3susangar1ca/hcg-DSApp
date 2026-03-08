@@ -4,3 +4,15 @@ C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructu
 C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.AssemblyInfo.cs
 C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.csproj.CoreCompileInputs.cache
 C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.sourcelink.json
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Infrastructure.deps.json
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Infrastructure.dll
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Infrastructure.pdb
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Application.dll
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Domain.dll
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Application.pdb
+C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Domain.pdb
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionD.4C46C3E6.Up2Date
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.dll
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\refint\GestionDocumental.Infrastructure.dll
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\GestionDocumental.Infrastructure.pdb
+C:\hcg-DSApp\src\Infrastructure\obj\Debug\net10.0\ref\GestionDocumental.Infrastructure.dll
