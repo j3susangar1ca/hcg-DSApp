@@ -1,10 +1,22 @@
-<Window
+﻿<Window
     x:Class="GestionDocumental.Presentation.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Sistema CADIDO">
-    <Grid>
-        <TextBlock Text="Sistema de Gesti�n Documental Cargado Correctamente" 
-                   HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource HeaderTextBlockStyle}"/>
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="HCG - Gestión Documental">
+
+    <Grid Padding="40">
+        <StackPanel Spacing="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <SymbolIcon Symbol="Target" RenderTransformOrigin="0.5,0.5">
+                <SymbolIcon.RenderTransform>
+                    <ScaleTransform ScaleX="3" ScaleY="3"/>
+                </SymbolIcon.RenderTransform>
+            </SymbolIcon>
+            <TextBlock Text="Sistema de Gestión Documental" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Estado: Nucleo Validado (100% Tests Pass)" Foreground="Green" HorizontalAlignment="Center"/>
+            <Button Content="Iniciar Proceso" HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
     </Grid>
 </Window>

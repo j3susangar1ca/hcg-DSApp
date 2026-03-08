@@ -1,11 +1,11 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Dispatching;
+﻿using Microsoft.UI.Xaml;
 
 namespace GestionDocumental.Presentation;
 
 public partial class App : Microsoft.UI.Xaml.Application
 {
-    private Window m_window;
+    // Se marca como anulable con '?' para evitar la advertencia CS8618
+    private Window? m_window;
 
     public App()
     {
