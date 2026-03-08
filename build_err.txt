@@ -1,0 +1,16 @@
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  GestionDocumental.Domain -> C:\hcg-DSApp\src\Domain\bin\Debug\net10.0\GestionDocumental.Domain.dll
+  GestionDocumental.Application -> C:\hcg-DSApp\src\Application\bin\Debug\net10.0\GestionDocumental.Application.dll
+  GestionDocumental.Infrastructure -> C:\hcg-DSApp\src\Infrastructure\bin\Debug\net10.0\GestionDocumental.Infrastructure.dll
+C:\hcg-DSApp\src\Presentation\App.xaml.cs(5,28): error CS0118: 'Application' es espacio de nombres pero se usa como tipo [C:\hcg-DSApp\src\Presentation\GestionDocumental.Presentation.csproj]
+C:\Users\jlang\.nuget\packages\microsoft.windowsappsdk.winui\1.8.260204000\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop.targets(845,9): error MSB3073: El comando ""C:\Users\jlang\.nuget\packages\microsoft.windowsappsdk.winui\1.8.260204000\buildTransitive\..\tools\net6.0\..\net472\XamlCompiler.exe" "obj\Debug\net10.0-windows10.0.19041.0\win-x64\\input.json" "obj\Debug\net10.0-windows10.0.19041.0\win-x64\\output.json"" salió con el código 1. [C:\hcg-DSApp\src\Presentation\GestionDocumental.Presentation.csproj]
+
+ERROR al compilar.
+
+C:\hcg-DSApp\src\Presentation\App.xaml.cs(5,28): error CS0118: 'Application' es espacio de nombres pero se usa como tipo [C:\hcg-DSApp\src\Presentation\GestionDocumental.Presentation.csproj]
+C:\Users\jlang\.nuget\packages\microsoft.windowsappsdk.winui\1.8.260204000\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop.targets(845,9): error MSB3073: El comando ""C:\Users\jlang\.nuget\packages\microsoft.windowsappsdk.winui\1.8.260204000\buildTransitive\..\tools\net6.0\..\net472\XamlCompiler.exe" "obj\Debug\net10.0-windows10.0.19041.0\win-x64\\input.json" "obj\Debug\net10.0-windows10.0.19041.0\win-x64\\output.json"" salió con el código 1. [C:\hcg-DSApp\src\Presentation\GestionDocumental.Presentation.csproj]
+    0 Advertencia(s)
+    2 Errores
+
+Tiempo transcurrido 00:00:05.18
