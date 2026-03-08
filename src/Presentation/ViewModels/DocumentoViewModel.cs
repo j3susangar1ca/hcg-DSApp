@@ -7,6 +7,8 @@ using GestionDocumental.Application.Interfaces;
 using GestionDocumental.Domain.Enums;
 using GestionDocumental.Domain.Exceptions;
 using Microsoft.UI.Dispatching;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace GestionDocumental.Presentation.ViewModels;
 
@@ -19,30 +21,19 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
     private readonly IUnitOfWork _unitOfWork;
     private readonly DispatcherQueue? _dispatcherQueue;
 
-    [ObservableProperty] private Guid _documentoId;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(IsFolioValid))] private string _folioOficial = string.Empty;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(IsRemitenteValid))] private string _remitente = string.Empty;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(IsAsuntoValid))] private string _asunto = string.Empty;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanSellar))] private string _rutaRedActual = string.Empty;
-    [ObservableProperty] private string _hashCriptografico = string.Empty;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanIngresar), nameof(CanSellar), nameof(CanClasificar), nameof(CanArchivar), nameof(CanRechazar))] private FaseCicloVida _faseActual = FaseCicloVida.Nacimiento;
+    [ObservableProperty] private string _folioOficial = string.Empty;
+    [ObservableProperty] private string _remitente = string.Empty;
+    [ObservableProperty] private string _asunto = string.Empty;
+    [ObservableProperty] private string _rutaRedActual = string.Empty;
+    [ObservableProperty] private string _rutaArchivoPdf = string.Empty;
+    [ObservableProperty] private FaseCicloVida _faseActual = FaseCicloVida.Nacimiento;
     [ObservableProperty] private bool _isUrgente;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanArchivar))] private Guid? _cadidoIdSeleccionado;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanIngresar))] private string _rutaArchivoPdf = string.Empty;
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanIngresar), nameof(CanSellar), nameof(CanClasificar), nameof(CanArchivar), nameof(CanRechazar))] private bool _isProcessing;
+    [ObservableProperty] private bool _isProcessing;
+    [ObservableProperty] private string _mensajeEstado = "Listo";
+    [ObservableProperty] private Guid? _cadidoIdSeleccionado;
 
-    public ObservableCollection<CatalogoCadidoItemViewModel> CatalogoCadidoItems { get; } = [];
-    public ObservableCollection<BitacoraItemViewModel> BitacoraEventos { get; } = [];
-
-    public bool IsFolioValid => !string.IsNullOrWhiteSpace(FolioOficial);
-    public bool IsRemitenteValid => !string.IsNullOrWhiteSpace(Remitente);
-    public bool IsAsuntoValid => !string.IsNullOrWhiteSpace(Asunto);
-
-    public bool CanIngresar => FaseActual == FaseCicloVida.Nacimiento && !string.IsNullOrEmpty(RutaArchivoPdf) && !IsProcessing;
-    public bool CanSellar => FaseActual == FaseCicloVida.Ingresado && !string.IsNullOrEmpty(RutaRedActual) && !IsProcessing;
-    public bool CanClasificar => FaseActual == FaseCicloVida.Sellado && !string.IsNullOrEmpty(RutaArchivoPdf) && !IsProcessing;
-    public bool CanArchivar => FaseActual == FaseCicloVida.Clasificado && CadidoIdSeleccionado.HasValue && !IsProcessing;
-    public bool CanRechazar => FaseActual != FaseCicloVida.Nacimiento && FaseActual != FaseCicloVida.Archivado && FaseActual != FaseCicloVida.Rechazado && !IsProcessing;
+    public bool CanClasificar => FaseActual == FaseCicloVida.Sellado && !IsProcessing;
+    public bool CanArchivar => FaseActual == FaseCicloVida.Clasificado && !IsProcessing;
 
     public DocumentoViewModel(IDocumentAnalyzerService analyzerService, IOcrProcessor ocrProcessor, ICryptoSealer cryptoSealer, INetworkStorageManager storageManager, IUnitOfWork unitOfWork)
     {
@@ -52,31 +43,50 @@ public sealed partial class DocumentoViewModel : ObservableObject, IDisposable
 
     private void EnqueueUI(Action action) { if (_dispatcherQueue != null) _dispatcherQueue.TryEnqueue(() => action()); else action(); }
 
-    [RelayCommand(CanExecute = nameof(CanArchivar))]
-    public async Task ArchivarDocumentoAsync(CancellationToken ct)
+    public async Task SeleccionarArchivoPdfAsync(nint windowHandle)
     {
-        if (!CadidoIdSeleccionado.HasValue) throw new ExcepcionDeNegocio("El documento no cumple las fases requeridas para archivar (CADIDO faltante)");
+        var picker = new FileOpenPicker();
+        InitializeWithWindow.Initialize(picker, windowHandle);
+        picker.FileTypeFilter.Add(".pdf");
+        var file = await picker.PickSingleFileAsync();
+        if (file != null) RutaArchivoPdf = file.Path;
+    }
+
+    public async Task IngresarDocumentoAsync(CancellationToken ct)
+    {
         IsProcessing = true;
         try {
-            var cat = (await _unitOfWork.Catalogos.BuscarAsync(c => c.Id == CadidoIdSeleccionado, ct)).FirstOrDefault();
-            if (cat == null) throw new ExcepcionDeNegocio("Catalogo no encontrado");
-            EnqueueUI(() => { FaseActual = FaseCicloVida.Archivado; });
+            RutaRedActual = await _storageManager.CopiarATemporalAsync(RutaArchivoPdf, ct);
+            EnqueueUI(() => { FaseActual = FaseCicloVida.Ingresado; });
+            await SellarDocumentoAsync(ct);
         } finally { EnqueueUI(() => IsProcessing = false); }
     }
 
-    [RelayCommand(CanExecute = nameof(CanRechazar))]
-    public async Task RechazarDocumentoAsync(CancellationToken ct)
+    public async Task SellarDocumentoAsync(CancellationToken ct)
     {
-        if (FaseActual == FaseCicloVida.Nacimiento) 
-            throw new ExcepcionDeNegocio("No se puede rechazar un documento en fase de Nacimiento");
-        
-        EnqueueUI(() => { FaseActual = FaseCicloVida.Rechazado; });
-        await Task.CompletedTask;
+        var hash = await _cryptoSealer.GenerarHashSha256Async(RutaRedActual, ct);
+        EnqueueUI(() => { FaseActual = FaseCicloVida.Sellado; });
+    }
+
+    public async Task ClasificarDocumentoAsync(CancellationToken ct)
+    {
+        IsProcessing = true;
+        try {
+            var texto = await _ocrProcessor.ExtraerTextoAsync(RutaRedActual, ct);
+            var res = await _analyzerService.AnalizarDocumentoAsync(texto, ct);
+            EnqueueUI(() => {
+                Remitente = res.Remitente; Asunto = res.Asunto; IsUrgente = res.EsUrgente;
+                FaseActual = FaseCicloVida.Clasificado;
+            });
+        } finally { EnqueueUI(() => IsProcessing = false); }
+    }
+
+    public async Task ArchivarDocumentoAsync(CancellationToken ct)
+    {
+        IsProcessing = true;
+        try { EnqueueUI(() => { FaseActual = FaseCicloVida.Archivado; }); }
+        finally { EnqueueUI(() => IsProcessing = false); }
     }
 
     public void Dispose() => _unitOfWork.Dispose();
 }
-
-public class CatalogoCadidoItemViewModel { public Guid Id { get; set; } public string Seccion { get; set; } = ""; public string Serie { get; set; } = ""; public string Subserie { get; set; } = ""; public int PlazoConservacionAnios { get; set; } }
-public class BitacoraItemViewModel { public Guid Id { get; set; } public DateTime Fecha { get; set; } public string FaseAnterior { get; set; } = ""; public string FaseNueva { get; set; } = ""; public string DescripcionEvento { get; set; } = ""; }
-public record FaseChangedMessage(FaseCicloVida NuevaFase);

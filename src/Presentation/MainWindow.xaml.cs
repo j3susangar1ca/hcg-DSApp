@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using GestionDocumental.Presentation.ViewModels;
 using System;
+using WinRT.Interop;
 
 namespace GestionDocumental.Presentation;
 
@@ -16,7 +17,8 @@ public sealed partial class MainWindow : Window
         ViewModel = app.Services.GetRequiredService<DocumentoViewModel>();
 
         BtnCargar.Click += async (s, e) => {
-            await ViewModel.SeleccionarArchivoPdfAsync(default);
+            var handle = WindowNative.GetWindowHandle(this);
+            await ViewModel.SeleccionarArchivoPdfAsync(handle);
             if (!string.IsNullOrEmpty(ViewModel.RutaArchivoPdf)) {
                 try { PdfViewer.Source = new Uri(ViewModel.RutaArchivoPdf); } catch {}
                 await ViewModel.IngresarDocumentoAsync(default);
@@ -27,10 +29,9 @@ public sealed partial class MainWindow : Window
         BtnArchivar.Click += async (s, e) => await ViewModel.ArchivarDocumentoAsync(default);
 
         ViewModel.PropertyChanged += (s, e) => {
-            if (e.PropertyName == nameof(ViewModel.FaseActual)) {
-                BtnIA.IsEnabled = ViewModel.CanClasificar;
-                BtnArchivar.IsEnabled = ViewModel.CanArchivar;
-            }
+            BtnIA.IsEnabled = ViewModel.CanClasificar;
+            BtnArchivar.IsEnabled = ViewModel.CanArchivar;
+            StatusText.Text = $"Fase: {ViewModel.FaseActual}";
         };
     }
 }
